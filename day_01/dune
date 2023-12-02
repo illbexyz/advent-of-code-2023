@@ -1,0 +1,5 @@
+(executable
+ (name day_01)
+ (libraries angstrom base stdio)
+ (preprocess
+  (pps ppx_deriving.show)))
