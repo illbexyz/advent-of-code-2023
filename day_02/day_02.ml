@@ -35,26 +35,32 @@ let game_total_colors game =
     blue = Hashtbl.find hash_tbl "blue" |> Option.value ~default:0;
   }
 
-let is_game_admissible game ~max_colors =
-  let game_colors = game_total_colors game in
-  game_colors.red <= max_colors.red
-  && game_colors.green <= max_colors.green
-  && game_colors.blue <= max_colors.blue
+let is_game_admissible { red; green; blue }
+    ~max_colors:{ red = maxRed; green = maxGreen; blue = maxBlue } =
+  red <= maxRed && green <= maxGreen && blue <= maxBlue
 
 let sum_game_ids games =
   List.fold games ~init:0 ~f:(fun acc game -> acc + game.id)
+
+let power_of_set { red; green; blue } = red * green * blue
 
 let () =
   let games =
     Parser.run (In_channel.read_all "input.txt") |> Result.ok_or_failwith
   in
   let max_colors = { red = 12; green = 13; blue = 14 } in
+
   let part_1 =
-    List.filter games ~f:(is_game_admissible ~max_colors) |> sum_game_ids
+    List.filter games ~f:(fun game ->
+        is_game_admissible (game_total_colors game) ~max_colors)
+    |> sum_game_ids
   in
 
   print_endline ("Part 1: " ^ Int.to_string part_1);
 
-  let part_2 = 0 in
+  let part_2 =
+    List.map games ~f:(fun game -> game_total_colors game |> power_of_set)
+    |> List.fold ~init:0 ~f:( + )
+  in
 
   print_endline ("Part 2: " ^ Int.to_string part_2)
