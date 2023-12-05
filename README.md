@@ -4,3 +4,4 @@
 - [Day 2: Cube Conundrum](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_02/day_02.ml) - OCaml
 - [Day 3: Gear Ratios](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_03/day_03.ml) - OCaml
 - [Day 4: Scratchcards](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_04/day_04.ml) - OCaml
+- [Day 5: If You Give A Seed A Fertilizer](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_05/day_05.ml) - OCaml
