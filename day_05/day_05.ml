@@ -38,6 +38,7 @@ module Parser = struct
 end
 
 let run_map map value =
+  (* printf "[run_map] %s %s: %i\n" map.categories.from map.categories.to_ value; *)
   let range =
     List.find map.ranges ~f:(fun range ->
         value >= range.source_start && value < range.source_start + range.length)
@@ -47,22 +48,40 @@ let run_map map value =
   | Some range -> range.dest_start + (value - range.source_start)
 
 let rec get_to_location almanac (category : string) (value : int) =
-  if String.equal category "location" then value
+  if String.equal category "location" then
+    (* let () = printf "[get_to_location] location found %i\n" value in *)
+    value
   else
+    (* let () = printf "[get_to_location] searching map\n" in *)
     let map =
       List.find_exn almanac.maps ~f:(fun map ->
           String.equal map.categories.from category)
     in
     get_to_location almanac map.categories.to_ (run_map map value)
 
+type int_list = int list [@@deriving show]
+
+let input = In_channel.read_all "input.txt"
+let almanac = Parser.run input |> Result.ok_or_failwith
+
 let () =
-  let input = In_channel.read_all "input.txt" in
-  let almanac = Parser.run input |> Result.ok_or_failwith in
   let part_1 =
     List.map almanac.seeds ~f:(get_to_location almanac "seed")
     |> List.min_elt ~compare:Int.compare
     |> Option.value_exn
   in
   print_endline ("Part 1: " ^ Int.to_string part_1);
-  let part_2 = 0 in
+  let part_2 =
+    almanac.seeds
+    |> List.groupi ~break:(fun i _ _ -> i % 2 = 0)
+    |> List.map ~f:(function
+         | [ from; range_length ] ->
+             List.range from (from + range_length) ~stride:4
+             |> List.map ~f:(get_to_location almanac "seed")
+             |> List.min_elt ~compare:Int.compare
+             |> Option.value_exn
+         | _ -> failwith "there's should always be two members of the list")
+    |> List.min_elt ~compare:Int.compare
+    |> Option.value_exn
+  in
   print_endline ("Part 2: " ^ Int.to_string part_2)
