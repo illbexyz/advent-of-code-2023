@@ -71,17 +71,34 @@ let () =
     |> Option.value_exn
   in
   print_endline ("Part 1: " ^ Int.to_string part_1);
-  let part_2 =
+  let ranges =
     almanac.seeds
     |> List.groupi ~break:(fun i _ _ -> i % 2 = 0)
     |> List.map ~f:(function
-         | [ from; range_length ] ->
-             List.range from (from + range_length) ~stride:4
-             |> List.map ~f:(get_to_location almanac "seed")
-             |> List.min_elt ~compare:Int.compare
-             |> Option.value_exn
+         | [ from; range_length ] -> (from, range_length)
          | _ -> failwith "there's should always be two members of the list")
+  in
+
+  let threads_num = 4 in
+  let thread_pool = Domainslib.Task.setup_pool ~num_domains:threads_num () in
+
+  let min_of_range (from, range_length) =
+    List.range from (from + range_length)
+    |> List.map ~f:(get_to_location almanac "seed")
     |> List.min_elt ~compare:Int.compare
     |> Option.value_exn
   in
-  print_endline ("Part 2: " ^ Int.to_string part_2)
+
+  let part_2 =
+    Domainslib.Task.run thread_pool (fun _ ->
+        Domainslib.Task.parallel_for_reduce thread_pool
+          (fun acc curr -> min acc curr)
+          Int.max_value
+          ~body:(fun i ->
+            let range = List.nth_exn ranges i in
+            min_of_range range)
+          ~start:0
+          ~finish:(List.length ranges - 1))
+  in
+  print_endline ("Part 2: " ^ Int.to_string part_2);
+  Domainslib.Task.teardown_pool thread_pool
