@@ -11,6 +11,13 @@ type map = { categories : map_categories; ranges : range list }
 
 type almanac = { maps : map list; seeds : int list } [@@deriving show]
 
+let par_map pool list ~f =
+  let results = ref @@ Array.create ~len:(List.length list) None in
+  Domainslib.Task.parallel_for pool ~start:0
+    ~finish:(Array.length !results - 1)
+    ~body:(fun i -> Array.set !results i (Some (f (List.nth_exn list i))));
+  !results |> Array.map ~f:(Option.value ~default:0) |> Array.to_list
+
 module Parser = struct
   open Angstrom
 
@@ -59,8 +66,6 @@ let rec get_to_location almanac (category : string) (value : int) =
     in
     get_to_location almanac map.categories.to_ (run_map map value)
 
-type int_list = int list [@@deriving show]
-
 let input = In_channel.read_all "input.txt"
 let almanac = Parser.run input |> Result.ok_or_failwith
 
@@ -79,9 +84,6 @@ let () =
          | _ -> failwith "there's should always be two members of the list")
   in
 
-  let threads_num = 4 in
-  let thread_pool = Domainslib.Task.setup_pool ~num_domains:threads_num () in
-
   let min_of_range (from, range_length) =
     List.range from (from + range_length)
     |> List.map ~f:(get_to_location almanac "seed")
@@ -89,16 +91,15 @@ let () =
     |> Option.value_exn
   in
 
+  let threads_num = 4 in
+  let thread_pool = Domainslib.Task.setup_pool ~num_domains:threads_num () in
+
   let part_2 =
     Domainslib.Task.run thread_pool (fun _ ->
-        Domainslib.Task.parallel_for_reduce thread_pool
-          (fun acc curr -> min acc curr)
-          Int.max_value
-          ~body:(fun i ->
-            let range = List.nth_exn ranges i in
-            min_of_range range)
-          ~start:0
-          ~finish:(List.length ranges - 1))
+        par_map thread_pool ranges ~f:min_of_range
+        |> List.min_elt ~compare:Int.compare
+        |> Option.value_exn)
   in
-  print_endline ("Part 2: " ^ Int.to_string part_2);
-  Domainslib.Task.teardown_pool thread_pool
+  Domainslib.Task.teardown_pool thread_pool;
+
+  print_endline ("Part 2: " ^ Int.to_string part_2)
