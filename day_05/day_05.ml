@@ -11,12 +11,14 @@ type map = { categories : map_categories; ranges : range list }
 
 type almanac = { maps : map list; seeds : int list } [@@deriving show]
 
-let par_map pool list ~f =
-  let results = ref @@ Array.create ~len:(List.length list) None in
-  Domainslib.Task.parallel_for pool ~start:0
-    ~finish:(Array.length !results - 1)
-    ~body:(fun i -> Array.set !results i (Some (f (List.nth_exn list i))));
-  !results |> Array.map ~f:(Option.value ~default:0) |> Array.to_list
+module Parallel = struct
+  let map pool list ~f =
+    let results = ref @@ Array.create ~len:(List.length list) None in
+    Domainslib.Task.parallel_for pool ~start:0
+      ~finish:(Array.length !results - 1)
+      ~body:(fun i -> Array.set !results i (Some (f (List.nth_exn list i))));
+    !results |> Array.map ~f:(Option.value ~default:0) |> Array.to_list
+end
 
 module Parser = struct
   open Angstrom
@@ -96,7 +98,7 @@ let () =
 
   let part_2 =
     Domainslib.Task.run thread_pool (fun _ ->
-        par_map thread_pool ranges ~f:min_of_range
+        Parallel.map thread_pool ranges ~f:min_of_range
         |> List.min_elt ~compare:Int.compare
         |> Option.value_exn)
   in
