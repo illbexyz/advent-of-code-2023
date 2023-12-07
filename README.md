@@ -6,3 +6,4 @@
 - [Day 4: Scratchcards](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_04/day_04.ml) - OCaml
 - [Day 5: If You Give A Seed A Fertilizer](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_05/day_05.ml) - OCaml
 - [Day 6: Wait For It](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_06/day_06.ml) - OCaml
+- [Day 7: Camel Cards](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_07/day_07.ml) - OCaml
