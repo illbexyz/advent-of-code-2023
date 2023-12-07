@@ -85,10 +85,9 @@ module Bet = struct
   type t = { hand : Hand.t; bet : int } [@@deriving show]
 
   let from_string str =
-    let parts = String.split str ~on:' ' in
-    let hand = List.hd_exn parts in
-    let bet = List.last_exn parts |> Int.of_string in
-    { hand = Hand.from_string hand; bet }
+    match String.split str ~on:' ' with
+    | [ hand; bet ] -> { hand = Hand.from_string hand; bet = Int.of_string bet }
+    | _ -> failwith "Invalid bet"
 end
 
 module Bets = struct
