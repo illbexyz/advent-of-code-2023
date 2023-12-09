@@ -1,7 +1,7 @@
 open Base
 open Stdio
 
-(* Allows us to create an infinite iteratore over the instructions  *)
+(* Allows us to create an infinite iterator over the instructions *)
 module Iterator = struct
   type 'a t = { list : 'a list; sequence : 'a Sequence.t; next : unit -> 'a }
 
@@ -37,9 +37,9 @@ module Graph = struct
 
   let get_node = Hashtbl.find_exn
 
-  let visit t instructions curr_label =
+  let visit t instructions ~from ~to_ =
     let rec aux t instructions curr_label steps =
-      if String.equal curr_label "ZZZ" then steps
+      if String.equal curr_label to_ then steps
       else
         let node = get_node t curr_label in
         let instruction = Iterator.next instructions in
@@ -48,7 +48,7 @@ module Graph = struct
         | Left -> aux t instructions node.Node.left (steps + 1)
         | Right -> aux t instructions node.Node.right (steps + 1)
     in
-    aux t instructions curr_label 0
+    aux t instructions from 0
 end
 
 module Parser = struct
@@ -82,7 +82,9 @@ let () =
   let input = In_channel.read_all "input.txt" in
   let instructions, graph = Parser.run input |> Result.ok_or_failwith in
   let part_1 =
-    Graph.visit graph (Iterator.create_repeating instructions) "AAA"
+    Graph.visit graph
+      (Iterator.create_repeating instructions)
+      ~from:"AAA" ~to_:"ZZZ"
   in
   printf "Part 1: %s\n" @@ Int.to_string part_1;
   let part_2 = 0 in
