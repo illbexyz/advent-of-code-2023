@@ -38,17 +38,16 @@ module Graph = struct
   let get_node = Hashtbl.find_exn
 
   let visit t instructions ~from ~to_ =
-    let rec aux t instructions curr_label steps =
+    let iterator = Iterator.create_repeating instructions in
+    let rec aux curr_label steps =
       if String.equal curr_label to_ then steps
       else
         let node = get_node t curr_label in
-        let instruction = Iterator.next instructions in
-        (* printf "Visiting %s\n" node.Node.label; *)
-        match instruction with
-        | Left -> aux t instructions node.Node.left (steps + 1)
-        | Right -> aux t instructions node.Node.right (steps + 1)
+        match Iterator.next iterator with
+        | Left -> aux node.Node.left (steps + 1)
+        | Right -> aux node.Node.right (steps + 1)
     in
-    aux t instructions from 0
+    aux from 0
 end
 
 module Parser = struct
@@ -81,11 +80,7 @@ end
 let () =
   let input = In_channel.read_all "input.txt" in
   let instructions, graph = Parser.run input |> Result.ok_or_failwith in
-  let part_1 =
-    Graph.visit graph
-      (Iterator.create_repeating instructions)
-      ~from:"AAA" ~to_:"ZZZ"
-  in
+  let part_1 = Graph.visit graph instructions ~from:"AAA" ~to_:"ZZZ" in
   printf "Part 1: %s\n" @@ Int.to_string part_1;
   let part_2 = 0 in
   printf "Part 2: %s\n" @@ Int.to_string part_2
