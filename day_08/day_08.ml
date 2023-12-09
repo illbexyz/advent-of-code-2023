@@ -21,6 +21,9 @@ module Node = struct
   type t = { label : string; left : string; right : string } [@@deriving show]
 
   let create label left right = { label; left; right }
+  let label t = t.label
+  let left t = t.left
+  let right t = t.right
 end
 
 type instruction = Left | Right
@@ -35,25 +38,48 @@ module Graph = struct
         Hashtbl.add_exn table ~key:n.Node.label ~data:n);
     table
 
-  let get_node = Hashtbl.find_exn
+  let get_node t label = Hashtbl.find_exn t label
+  let get_nodes = Hashtbl.data
+
+  let show_nodes t =
+    get_nodes t |> List.map ~f:Node.show |> String.concat ~sep:"\n"
+
+  let get_nodes_ending_with t pattern =
+    get_nodes t
+    |> List.filter ~f:(fun n -> String.is_suffix n.Node.label ~suffix:pattern)
 
   let visit t instructions ~from ~to_ =
     let iterator = Iterator.create_repeating instructions in
     let rec aux curr_label steps =
-      if String.equal curr_label to_ then steps
+      if String.is_suffix curr_label ~suffix:to_ then steps
       else
         let node = get_node t curr_label in
-        match Iterator.next iterator with
-        | Left -> aux node.Node.left (steps + 1)
-        | Right -> aux node.Node.right (steps + 1)
+        let get_fn =
+          match Iterator.next iterator with
+          | Left -> Node.left
+          | Right -> Node.right
+        in
+        aux (get_fn node) (steps + 1)
     in
     aux from 0
+
+  let rec gcd a b = if b = 0 then a else gcd b (a % b)
+  let lcm a b = a * b / gcd a b
+  let lcm_list = List.fold ~init:1 ~f:lcm
+
+  let visit_part_2 t instructions ~from ~to_ =
+    let starting_nodes = get_nodes_ending_with t from in
+    let paths_lengths =
+      List.map starting_nodes ~f:(fun node ->
+          visit t instructions ~from:(Node.label node) ~to_)
+    in
+    lcm_list paths_lengths
 end
 
 module Parser = struct
   open Angstrom
 
-  let label = take_while1 Char.is_alpha
+  let label = take_while1 Char.is_alphanum
   let wss = take_while1 Char.is_whitespace
 
   let instructions =
@@ -82,5 +108,5 @@ let () =
   let instructions, graph = Parser.run input |> Result.ok_or_failwith in
   let part_1 = Graph.visit graph instructions ~from:"AAA" ~to_:"ZZZ" in
   printf "Part 1: %s\n" @@ Int.to_string part_1;
-  let part_2 = 0 in
+  let part_2 = Graph.visit_part_2 graph instructions ~from:"A" ~to_:"Z" in
   printf "Part 2: %s\n" @@ Int.to_string part_2
