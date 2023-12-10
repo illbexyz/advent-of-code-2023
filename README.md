@@ -9,3 +9,4 @@
 - [Day 7: Camel Cards](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_07/day_07.ml) - OCaml
 - [Day 8: Haunted Wasteland](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_08/day_08.ml) - OCaml
 - [Day 9: Mirage Maintenance](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_09/day_09.ml) - OCaml
+- [Day 10: Pipe Maze](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_10/day_10.ml) - OCaml
