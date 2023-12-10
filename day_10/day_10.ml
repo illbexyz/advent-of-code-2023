@@ -129,9 +129,9 @@ let get_initial_steps grid =
   let from, _ =
     Grid.findi_exn grid ~f:(fun _idx cell -> phys_equal cell StartingPosition)
   in
-  let adj_cells = Grid.get_adjacents grid from ~diagonals:false in
+  let adj_cells = Grid.get_adjacents_coords grid from ~diagonals:false in
   let valid_adj_steps =
-    List.filter_map adj_cells ~f:(fun (to_, _) ->
+    List.filter_map adj_cells ~f:(fun to_ ->
         let step = { from; to_ } in
         if is_valid_step grid step then Some { from; to_ } else None)
   in
