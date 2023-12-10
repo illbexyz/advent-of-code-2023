@@ -8,3 +8,4 @@
 - [Day 6: Wait For It](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_06/day_06.ml) - OCaml
 - [Day 7: Camel Cards](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_07/day_07.ml) - OCaml
 - [Day 8: Haunted Wasteland](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_08/day_08.ml) - OCaml
+- [Day 9: Mirage Maintenance](https://github.com/illbexyz/advent-of-code-2023/blob/main/day_09/day_09.ml) - OCaml
