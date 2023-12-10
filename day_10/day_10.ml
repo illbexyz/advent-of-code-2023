@@ -27,7 +27,7 @@ module Cell = struct
 end
 
 module Grid = struct
-  type t = { grid : Cell.t array; rows : int; cols : int }
+  type 'a t = { grid : 'a array; rows : int; cols : int }
 
   (* Converts 2d coords to 1d index *)
   let index t x y = (x * t.cols) + y
@@ -46,6 +46,8 @@ module Grid = struct
     in
     let cols = Array.length grid / rows in
     { grid; rows; cols }
+
+  let map t ~f = { t with grid = Array.map t.grid ~f }
 
   let findi_exn t ~f =
     let idx, item = Array.findi_exn t.grid ~f in
@@ -127,7 +129,8 @@ let get_next_step grid prev_step =
 
 let get_initial_steps grid =
   let from, _ =
-    Grid.findi_exn grid ~f:(fun _idx cell -> phys_equal cell StartingPosition)
+    Grid.findi_exn grid ~f:(fun _idx cell ->
+        phys_equal cell Cell.StartingPosition)
   in
   let adj_cells = Grid.get_adjacents_coords grid from ~diagonals:false in
   let valid_adj_steps =
@@ -140,7 +143,7 @@ let get_initial_steps grid =
 let walk_loop grid step =
   let step = ref step in
   let length = ref 0 in
-  while not @@ phys_equal (Grid.get grid !step.to_) StartingPosition do
+  while not @@ phys_equal (Grid.get grid !step.to_) Cell.StartingPosition do
     printf "[walk_loop] %s\n" (show_step !step);
     length := !length + 1;
     step := get_next_step grid !step
